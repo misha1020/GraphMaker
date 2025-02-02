@@ -5,7 +5,7 @@ namespace GraphMaker.Extensions
 {
     public static partial class GraphExtensions
     {
-        struct PathToNode
+        public struct PathToNode
         {
             public INode Node { get; set; }
             public List<IEdge> Path { get; set; }

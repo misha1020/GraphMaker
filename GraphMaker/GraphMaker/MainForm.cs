@@ -506,34 +506,7 @@ namespace GraphMaker
 
         private void shortestPath_Click(object sender, EventArgs e)
         {
-            edgesColorBlack();
-            foreach (var node in graph.NodeInfos)
-            {
-                node.Value.Color = Color.White;
-            }
-            spSelectedNode1 = null;
-            spSelectedNode2 = null;
-            if (selectionMode)
-            {
-                selectionMode = false;
-                this.imDrawSpace.MouseDown += new System.Windows.Forms.MouseEventHandler(this.imDrawSpace_MouseDown);
-                this.imDrawSpace.MouseUp += new System.Windows.Forms.MouseEventHandler(this.imDrawSpace_MouseUp);
-                this.imDrawSpace.MouseClick -= new System.Windows.Forms.MouseEventHandler(this.selectNodes);
-                shortestPath_ToolMenuStrip.BackColor = Color.White;
-                gbShortestPath.Visible = false;
-                MessageBox.Show("Выбор вершин отменен.");
-            }
-            else
-            {
-                selectionMode = true;
-                this.imDrawSpace.MouseDown -= new System.Windows.Forms.MouseEventHandler(this.imDrawSpace_MouseDown);
-                this.imDrawSpace.MouseUp -= new System.Windows.Forms.MouseEventHandler(this.imDrawSpace_MouseUp);
-                this.imDrawSpace.MouseClick += new System.Windows.Forms.MouseEventHandler(this.selectNodes);
-                shortestPath_ToolMenuStrip.BackColor = Color.Red;
-                gbShortestPath.Visible = true;
-                tbShortestPath.Text = @"Выберите первую вершину.
-Для отмены нажмите кнопку еще раз.";
-            }
+            
         }
         
         private void selectNodes(object sender, MouseEventArgs e)
@@ -560,6 +533,22 @@ namespace GraphMaker
                             graph.NodeInfos[spSelectedNode2].Color = Color.Red;
                             findShortestPath();
                         }
+                    }
+                }
+            }
+        }
+
+        private void selectNode(object sender, MouseEventArgs e)
+        {
+            if (NodesEdges.Nodes == mouseOn)
+            {
+                if (e.Button == MouseButtons.Left)
+                {
+                    if (spSelectedNode1 == null)
+                    {
+                        spSelectedNode1 = selectedNode;
+                        graph.NodeInfos[spSelectedNode1].Color = Color.Green;
+                        findShortestPathDijekstra();
                     }
                 }
             }
@@ -593,6 +582,38 @@ namespace GraphMaker
             }            
         }
 
+        private void findShortestPathDijekstra()
+        {
+            gbShortestPath.Visible = false;
+            selectionMode = false;
+            this.imDrawSpace.MouseDown += new System.Windows.Forms.MouseEventHandler(this.imDrawSpace_MouseDown);
+            this.imDrawSpace.MouseUp += new System.Windows.Forms.MouseEventHandler(this.imDrawSpace_MouseUp);
+            this.imDrawSpace.MouseClick -= new System.Windows.Forms.MouseEventHandler(this.selectNode);
+            var shortestPaths = graph.GetShortestPathDijkstra(spSelectedNode1);
+            shortestPath_ToolMenuStrip.BackColor = Color.White;
+            if (shortestPaths == null)
+            {
+                MessageBox.Show("Между данными вершинами нет пути.");
+            }
+            else
+            {
+                var outStr = "";
+                var path = 0;
+                foreach (var spath in shortestPaths)
+                {
+                    var min = spath.Value.MinimalLenght;
+                    var num = spath.Key;
+                    outStr += $"Длина кратчайшего пути до {num} = {min}\n";
+                    foreach (var edge in spath.Value.Path)
+                    {
+                        outStr += edge.ToString() + " (" + edge.Length + ")\n";
+                    }
+                }
+                MessageBox.Show(outStr);
+                cbEdgeSizeChange.SelectedItem = null;
+            }
+        }
+
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             if (e.CloseReason == CloseReason.UserClosing)
@@ -607,6 +628,72 @@ namespace GraphMaker
         private void MainForm_Resize(object sender, EventArgs e)
         {
             draw();
+        }
+
+        private void sortestPathToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            edgesColorBlack();
+            foreach (var node in graph.NodeInfos)
+            {
+                node.Value.Color = Color.White;
+            }
+            spSelectedNode1 = null;
+            spSelectedNode2 = null;
+            if (selectionMode)
+            {
+                selectionMode = false;
+                this.imDrawSpace.MouseDown += new System.Windows.Forms.MouseEventHandler(this.imDrawSpace_MouseDown);
+                this.imDrawSpace.MouseUp += new System.Windows.Forms.MouseEventHandler(this.imDrawSpace_MouseUp);
+                this.imDrawSpace.MouseClick -= new System.Windows.Forms.MouseEventHandler(this.selectNodes);
+                shortestPath_ToolMenuStrip.BackColor = Color.White;
+                gbShortestPath.Visible = false;
+                MessageBox.Show("Выбор вершин отменен.");
+            }
+            else
+            {
+                selectionMode = true;
+                this.imDrawSpace.MouseDown -= new System.Windows.Forms.MouseEventHandler(this.imDrawSpace_MouseDown);
+                this.imDrawSpace.MouseUp -= new System.Windows.Forms.MouseEventHandler(this.imDrawSpace_MouseUp);
+                this.imDrawSpace.MouseClick += new System.Windows.Forms.MouseEventHandler(this.selectNodes);
+                shortestPath_ToolMenuStrip.BackColor = Color.Red;
+                gbShortestPath.Visible = true;
+                tbShortestPath.Text = @"Выберите первую вершину.
+Для отмены нажмите кнопку еще раз.";
+            }
+        }
+
+        private void dijkstraToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            edgesColorBlack();
+            foreach (var node in graph.NodeInfos)
+            {
+                node.Value.Color = Color.White;
+            }
+            spSelectedNode1 = null;
+            if (selectionMode)
+            {
+                selectionMode = false;
+                this.imDrawSpace.MouseDown += new System.Windows.Forms.MouseEventHandler(this.imDrawSpace_MouseDown);
+                this.imDrawSpace.MouseUp += new System.Windows.Forms.MouseEventHandler(this.imDrawSpace_MouseUp);
+                this.imDrawSpace.MouseClick += new System.Windows.Forms.MouseEventHandler(this.selectNode);
+
+                shortestPath_ToolMenuStrip.BackColor = Color.White;
+                gbShortestPath.Visible = false;
+                MessageBox.Show("Выбор вершин отменен.");
+            }
+            else
+            {
+                selectionMode = true;
+                this.imDrawSpace.MouseDown -= new System.Windows.Forms.MouseEventHandler(this.imDrawSpace_MouseDown);
+                this.imDrawSpace.MouseUp -= new System.Windows.Forms.MouseEventHandler(this.imDrawSpace_MouseUp);
+                this.imDrawSpace.MouseClick += new System.Windows.Forms.MouseEventHandler(this.selectNode);
+
+                shortestPath_ToolMenuStrip.BackColor = Color.Red;
+                gbShortestPath.Visible = true;
+                tbShortestPath.Text = @"Выберите первую вершину.
+Для отмены нажмите кнопку еще раз.";
+            }
+           
         }
 
         private void edgesColorBlack()

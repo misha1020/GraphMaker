@@ -10,7 +10,7 @@ namespace GraphMaker.Extensions
 {
     public static partial class GraphExtensions
     {
-        public static Dictionary<int, PathToNode> GetShortestPathDijkstra(this IGraph graph, INode start)
+        public static Dictionary<int, PathToNode> GetShortestPathDijkstra(this IGraph graph, INode start, int Weight = -1)
         {
 
             var nodePaths = new Dictionary<int, PathToNode>();
@@ -23,8 +23,15 @@ namespace GraphMaker.Extensions
             {
                 var currNode = queue.Dequeue();
                 var currPath = nodePaths[currNode.Number];
-                foreach (Edge edge in currNode.IncidentEdges)
+                foreach (var edge in currNode.IncidentEdges)
                 {
+
+                    if (edge is EdgeWithConstraints constraints && Weight > 0)
+                    {
+                        if (constraints.MaxWeight < Weight)
+                            continue;
+                    }
+
                     var node = edge.OtherNode(currNode);
                     var distance = nodePaths[currNode.Number].MinimalLenght + edge.Length;
                     
@@ -44,9 +51,6 @@ namespace GraphMaker.Extensions
                         {
                             nodePaths[node.Number] = new PathToNode(node, distance, path);
                         }
-
-                        //if (!nodePaths[node.Number].Viseted)
-                        //    queue.Enqueue(node);
                     }
 
                 }

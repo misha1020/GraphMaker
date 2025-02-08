@@ -42,6 +42,24 @@ namespace GraphMaker.Model
             }
             // Если вершины уже соединены, то просто вернём нужное ребро
             var edge = new Edge(node1, node2, length);
+
+            node1.IncidentEdges.Add(edge);
+            node2.IncidentEdges.Add(edge);
+            return edge;
+        }
+
+        public static IEdge Connect(INode node1, INode node2, int length, int weight = 0)
+        {
+            if (node1.IncidentNodes.Contains(node2))
+            {
+                return node1
+                    .IncidentEdges
+                    .First(e => e.First == node1 && e.Second == node2 ||
+                                e.First == node2 && e.Second == node1);
+            }
+            // Если вершины уже соединены, то просто вернём нужное ребро
+            var edge = new EdgeWithConstraints(node1, node2, length, weight);
+
             node1.IncidentEdges.Add(edge);
             node2.IncidentEdges.Add(edge);
             return edge;
